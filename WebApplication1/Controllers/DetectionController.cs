@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -13,15 +16,16 @@ namespace WebApplication1.Controllers
 {
     public class DetectionController : Controller
     {
-        private const string FaceApiKey = "<Add your subscription key>";
+        private const string FaceApiKey = "9428881160954b0ba5be3986c5e0931f";
         private const string FaceApiUriBase = "https://westcentralus.api.cognitive.microsoft.com/face/v1.0/detect";
 
         // GET: Detection
         public ActionResult Index()
         {
-            FacesModel faces = new FacesModel();
-
-            faces.ImagePath = Url.Content("~/Content/Images/DefaultFaceImage.jpg");
+            FacesModel faces = new FacesModel
+            {
+                ImagePath = Url.Content("~/Content/Images/DefaultFaceImage.jpg")
+            };
 
             return View(faces);
         }
@@ -52,13 +56,19 @@ namespace WebApplication1.Controllers
 
                     if (file.ContentLength > 0)
                     {
+                        Bitmap bmp;
                         Task<string> result;
                         string fileName;
 
                         fileName = Path.GetFileName(file.FileName);
                         faces.ImagePath = Url.Content(string.Format("~/Content/Images/{0}", fileName));
                         mappedFileName = Path.Combine(Server.MapPath("~/Content/Images"), fileName);
-                        file.SaveAs(mappedFileName);
+
+                        // Resize image to our size (300x300)
+                        bmp = new Bitmap(file.InputStream);
+                        bmp = ResizeImage(bmp, 300, 300);
+                        bmp.Save(mappedFileName);
+                        //file.SaveAs(mappedFileName);
 
                         // Call Face Api and wait for result
                         result = MakeAnalysisRequestAsync(mappedFileName);
@@ -171,6 +181,30 @@ namespace WebApplication1.Controllers
             }
         }
 
+        private Bitmap ResizeImage(Image image, int width, int height)
+        {
+            var destRect = new Rectangle(0, 0, width, height);
+            var destImage = new Bitmap(width, height);
+
+            destImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
+
+            using (var graphics = Graphics.FromImage(destImage))
+            {
+                graphics.CompositingMode = CompositingMode.SourceCopy;
+                graphics.CompositingQuality = CompositingQuality.HighQuality;
+                graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                graphics.SmoothingMode = SmoothingMode.HighQuality;
+                graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+
+                using (var wrapMode = new ImageAttributes())
+                {
+                    wrapMode.SetWrapMode(WrapMode.TileFlipXY);
+                    graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, wrapMode);
+                }
+            }
+
+            return destImage;
+        }
 
     }
 }
