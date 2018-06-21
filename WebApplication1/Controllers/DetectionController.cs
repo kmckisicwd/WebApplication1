@@ -22,8 +22,6 @@ namespace WebApplication1.Controllers
         // GET: Detection
         public ActionResult Index()
         {
-            string s;
-
             FacesModel faces = new FacesModel
             {
                 ImagePath = GetFullUrl("Content/Images/DefaultFaceImage.jpg")
@@ -46,12 +44,17 @@ namespace WebApplication1.Controllers
         }
 
         // POST: Detection/Create
+        /// <summary>
+        /// Called when submit button is pressed
+        /// </summary>
+        /// <param name="faces">The model that was originally passed to the page.</param>
+        /// <returns>The face detection view with selected image and face detections.</returns>
         [HttpPost]
         public ActionResult Create(FacesModel faces)
         {
             try
             {
-                // TODO: Add insert logic here
+                // Determine if a file was sent
                 if (Request.Files.Count > 0)
                 {
                     HttpPostedFileBase file = Request.Files[0];
@@ -63,6 +66,7 @@ namespace WebApplication1.Controllers
                         Task<string> result;
                         string fileName;
 
+                        // Grab filename and extension so that we can save it to the server
                         fileName = Path.GetFileName(file.FileName);
                         faces.ImagePath = GetFullUrl(string.Format("Content/Images/{0}", fileName));
                         mappedFileName = Path.Combine(Server.MapPath("~/Content/Images"), fileName);
