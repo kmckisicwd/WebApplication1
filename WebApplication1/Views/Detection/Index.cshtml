@@ -17,7 +17,30 @@
             @Html.DisplayFor(m => m.Detections)
         </div>
         <div class="col-md-4">
-            <img src="@Model.ImagePath" alt="" width="300" height="300" />
+            <!--<img src="@Model.ImagePath" alt="" width="300" height="300" />-->
+            <canvas id="detectFrames" width="300" height="300">
+                Your browser does not support the HTML5 canvas tag.
+            </canvas>
         </div>
     </div>
+    <script>
+
+        var canvas = document.getElementById("detectFrames");
+        var ctx = canvas.getContext("2d");
+        var imageObj = new Image();
+
+        ctx.strokeStyle = "#FF0000";
+        ctx.lineWidth = 2;
+        imageObj.onload = function () {
+            ctx.drawImage(imageObj, 0, 0, 300, 300);
+
+            @foreach(var face in Model.Faces)
+            {
+                @:ctx.strokeRect(@face.FaceRectangle.X, @face.FaceRectangle.Y, @face.FaceRectangle.Width, @face.FaceRectangle.Height);
+            }
+        };
+        imageObj.src = '@Model.ImagePath';
+
+    </script>
 }
+

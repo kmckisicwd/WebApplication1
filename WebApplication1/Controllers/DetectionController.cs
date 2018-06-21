@@ -22,11 +22,14 @@ namespace WebApplication1.Controllers
         // GET: Detection
         public ActionResult Index()
         {
+            string s;
+
             FacesModel faces = new FacesModel
             {
-                ImagePath = Url.Content("~/Content/Images/DefaultFaceImage.jpg")
+                ImagePath = GetFullUrl("Content/Images/DefaultFaceImage.jpg")
             };
 
+            System.Diagnostics.Debug.WriteLine(faces.ImagePath);
             return View(faces);
         }
 
@@ -61,7 +64,7 @@ namespace WebApplication1.Controllers
                         string fileName;
 
                         fileName = Path.GetFileName(file.FileName);
-                        faces.ImagePath = Url.Content(string.Format("~/Content/Images/{0}", fileName));
+                        faces.ImagePath = GetFullUrl(string.Format("Content/Images/{0}", fileName));
                         mappedFileName = Path.Combine(Server.MapPath("~/Content/Images"), fileName);
 
                         // Resize image to our size (300x300)
@@ -206,5 +209,14 @@ namespace WebApplication1.Controllers
             return destImage;
         }
 
+        private string GetFullUrl(string relativePath)
+        {
+            string fullPath;
+            string baseUrl;
+
+            baseUrl = string.Format("{0}://{1}{2}", Request.Url.Scheme, Request.Url.Authority, Url.Content("~"));
+            fullPath = string.Format("{0}{1}", baseUrl, relativePath);
+            return fullPath;
+        }
     }
 }
