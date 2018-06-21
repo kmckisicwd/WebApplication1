@@ -1,0 +1,23 @@
+﻿
+@model WebApplication1.Models.FacesModel
+
+@{
+    ViewBag.Title = "Face Detection";
+}
+
+<h2>Face Detection</h2>
+@using (Html.BeginForm("Create", "Detection", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    <div class="row">
+        <div class="col-md-4">
+            <h2>Select Image</h2>
+            <input id="ImageFile" name="FaceFile" type="file" />
+            <input id="Submit1" type="submit" value="submit" />
+            <h2>Image Results</h2>
+            @Html.DisplayFor(m => m.Detections)
+        </div>
+        <div class="col-md-4">
+            <img src="@Model.ImagePath" alt="" width="300" height="300" />
+        </div>
+    </div>
+}
